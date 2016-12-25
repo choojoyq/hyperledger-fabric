@@ -1,23 +1,25 @@
 version: '2'
 
 services:
-  vp:  # vp node no needing membersrvc
-    #image: hyperledger/fabric-peer:latest
-   #image: yeasy/hyperledger-fabric-peer:0.6-dp
-   image: hyperledger/fabric-peer
-   #image: ibmblockchain/fabric-peer:x86_64-0.6.1-preview
+  vp:
+    image: hyperledger/fabric-peer
     restart: unless-stopped
     environment:
-     # - CORE_PEER_ADDRESSAUTODETECT=true
-      - CORE_LOGGING_LEVEL=info
-     #  - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=noops
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_NETWORKID=dev
+      - CORE_LOGGING_LEVEL=info  #critical, error, warning, notice, info, debug
+     #- CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_noops  # uncomment this to use specific network
+      # The following section enables pbft consensus
+      - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=noops  # noops, pbft
+      - CORE_NOOPS_BLOCK_TIMEOUT=2s
+      - CORE_NOOPS_BLOCK_WAIT=2s
     expose:
-      - "7050"  # Rest
-      - "7051"  # Grpc
-      - "7052"  # Peer CLI
-      - "7053"  # Peer Event
+      - "7051"
+      - "7052"
+      - "7053"
     ports:
-        - "7050:7050"
+      - "7050:7050"
     volumes: # docker.sock is mapped as the default CORE_VM_ENDPOINT
       - /var/run/docker.sock:/var/run/docker.sock
     command: peer node start  # this repeats the default cmd to make sure
+  # command: sh -c "sleep 5; peer node start"  # peer node should have booting delay with CA
